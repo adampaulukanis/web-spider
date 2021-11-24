@@ -1,0 +1,30 @@
+{
+  "name": "web-spider",
+  "version": "1.0.0",
+  "description": "A simple web spider",
+  "main": "index.js",
+  "scripts": {
+    "dev": "./node_modules/nodemon/bin/nodemon.js index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/adampaulukanis/web-spider.git"
+  },
+  "keywords": [
+    "web spider"
+  ],
+  "author": "Adam Paulukanis",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/adampaulukanis/web-spider/issues"
+  },
+  "homepage": "https://github.com/adampaulukanis/web-spider#readme",
+  "devDependencies": {
+    "nodemon": "^2.0.15"
+  },
+  "dependencies": {
+    "mkdirp": "^0.5.1",
+    "request": "^2.67.0",
+    "slug": "^0.9.1"
+  }
+}
