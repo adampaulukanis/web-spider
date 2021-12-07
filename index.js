@@ -6,6 +6,8 @@ const mkdirp = require('mkdirp');
 const path = require('path');
 const utilities = require('./utilities');
 
+const myUrl = process.argv[2] || 'http://www.example.com';
+
 function saveFile(filename, contents, callback) {
   mkdirp(path.dirname(filename), (err) => {
     if (err) {
@@ -31,27 +33,56 @@ function download(url, filename, callback) {
   });
 }
 
-function spider(url, callback) {
-  const filename = utilities.urlToFilename(url);
-  fs.exists(filename, (exists) => {
-    if (exists) {
-      return callback(null, filename, false);
+function spiderLinks(currentUrl, body, nesting, callback) {
+  if (nesting === 0) {
+    return process.nextTick(callback);
+  }
+  const links = utilities.getPageLinks(currentUrl, body); // obtain the list of all the links contained in the page
+
+  function iterate(index) {
+    // iterate over the links
+    if (index === links.length) {
+      return callback();
     }
-    download(url, filename, (err) => {
+
+    spider(links[index], nesting - 1, (err) => {
+      // now we are ready to process the link
       if (err) {
         return callback(err);
       }
-      callback(null, filename, true);
+
+      iterate(index + 1);
     });
+  }
+
+  iterate(0); // start
+}
+
+function spider(url, nesting, callback) {
+  const filename = utilities.urlToFilename(url);
+  fs.readFile(filename, 'utf8', (err, body) => {
+    if (err) {
+      if (err.code !== 'ENOENT') {
+        return callback(err);
+      }
+
+      return download(url, filename, (err, body) => {
+        if (err) {
+          return callback(err);
+        }
+        spiderLinks(url, body, nesting, callback);
+      });
+    }
+
+    spiderLinks(url, body, nesting, callback);
   });
 }
 
-spider(process.argv[2], (err, filename, downloaded) => {
+spider(myUrl, 6, (err) => {
   if (err) {
     console.error(err);
-  } else if (downloaded) {
-    console.log(`Completed the download of "${filename}"`);
+    process.exit(1);
   } else {
-    console.log(`"${filename}" was already downloaded`);
+    console.log('Download complete');
   }
 });
