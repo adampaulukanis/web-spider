@@ -1,77 +1,62 @@
 'use strict';
 
-const loger = [];
-
-function randomSeconds() {
-  return 100 * (Math.floor(Math.random() * 10) + 1);
+/**
+ * return a random number of seconds
+ */
+function randomNumberBetween(min, max) {
+  return Math.floor(Math.random() * (max - min) + min) * 1000;
 }
 
 function one(next) {
   setTimeout(() => {
     next(null, '1st task done');
-  }, randomSeconds());
+  }, randomNumberBetween(1, 5));
 }
 
 function two(next) {
   setTimeout(() => {
     next(null, '2nd task done');
-  }, randomSeconds());
+  }, randomNumberBetween(1, 5));
 }
 
 function three(next) {
   setTimeout(() => {
     next(null, '3rd task done');
-  }, randomSeconds());
+  }, randomNumberBetween(1, 5));
 }
 
 const tasks = [
   one,
   two,
   three,
-  (next) => {
-    next(new Error('not good'));
-  },
   function four(next) {
     setTimeout(() => {
       next(null, '4th task done');
-    }, randomSeconds());
+    }, randomNumberBetween(1, 5));
   },
   function five(next) {
     setTimeout(() => {
       next(null, '5th task done');
-    }, randomSeconds());
+    }, randomNumberBetween(1, 5));
   },
   function six(next) {
     setTimeout(() => {
       next(null, '6th task done');
-    }, randomSeconds());
+    }, randomNumberBetween(1, 5));
   },
 ];
 
-function iterate(index) {
-  if (index === tasks.length) {
-    return finish();
-  }
-  const task = tasks[index];
-  task(function (err, msg) {
-    loger.push({ index, err: err?.message, msg });
-    if (err) {
-      onError(err, index);
-    } else {
-      console.log(`Task #${index} done with msg: ${msg}`);
+let completed = 0;
+tasks.forEach((task, i) => {
+  console.log(`task ${i} started`);
+  task(() => {
+    console.log(`task ${i} completed`);
+    if (++completed === tasks.length) {
+      finish();
     }
-    return iterate(index + 1);
   });
-}
+});
 
 function finish() {
-  console.log('completed');
-  console.table(loger);
+  console.log('All the tasks completed');
 }
-
-function onError(err, index) {
-  console.log(`Error: Task #${index}: `, err.message);
-  //process.exit(1);
-}
-
-iterate(0);

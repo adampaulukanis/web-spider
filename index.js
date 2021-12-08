@@ -38,24 +38,26 @@ function spiderLinks(currentUrl, body, nesting, callback) {
     return process.nextTick(callback);
   }
   const links = utilities.getPageLinks(currentUrl, body); // obtain the list of all the links contained in the page
-
-  function iterate(index) {
-    // iterate over the links
-    if (index === links.length) {
-      return callback();
-    }
-
-    spider(links[index], nesting - 1, (err) => {
-      // now we are ready to process the link
-      if (err) {
-        return callback(err);
-      }
-
-      iterate(index + 1);
-    });
+  if (links.length === 0) {
+    return process.nextTick(callback);
   }
 
-  iterate(0); // start
+  let completed = 0,
+    hasErrors = false;
+
+  function done(err) {
+    if (err) {
+      hasErrors = true;
+      return callback(err);
+    }
+    if (++completed === links.length && !hasErrors) {
+      return callback();
+    }
+  }
+
+  links.forEach((link) => {
+    spider(link, nesting - 1, done);
+  });
 }
 
 function spider(url, nesting, callback) {
