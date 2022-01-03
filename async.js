@@ -39,18 +39,25 @@ const tasks = [
       next(null, '5th task done');
     }, randomNumberBetween(1, 5));
   },
+  function fivehalf(next) {
+    next(null, 'i am a different thing');
+  },
   function six(next) {
     setTimeout(() => {
       next(null, '6th task done');
     }, randomNumberBetween(1, 5));
+  },
+  function iwillfail(next) {
+    next(Error('kaszana!'));
   },
 ];
 
 let completed = 0;
 tasks.forEach((task, i) => {
   console.log(`task ${i} started`);
-  task(() => {
-    console.log(`task ${i} completed`);
+  task((err, msg) => {
+    /* The current task has just completed */
+    console.log({ err, msg });
     if (++completed === tasks.length) {
       finish();
     }
